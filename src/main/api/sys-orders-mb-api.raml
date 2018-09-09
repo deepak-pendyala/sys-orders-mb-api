@@ -1,0 +1,56 @@
+#%RAML 1.0
+baseUri: https://mocksvc.mulesoft.com/mocks/1d06148d-0038-4da0-adf4-f027d1a7b176 # baseUri: https://mocksvc.mulesoft.com/mocks/33ea2e82-44fa-4fdf-a427-99e6480d256a # 
+#last-updated-timestamp: 09/07/2018 03:06PM
+title: System API for Modusbox's orders domain.
+version: v1
+documentation:
+  - title: System API for Modusbox's orders domain.
+    content: >      
+uses: 
+  OrdersRequestTypesLib: libraries/OrdersRequestTypesLib.raml
+  traits: traits/traitsLibrary.raml
+
+/orders:
+  /{orderId}:
+    uriParameters: 
+      orderId: 
+        description: Order Id
+        type: number
+        example: 15346
+    get:
+        description: Returns Placement Date and Customer Name for the order id.
+        is: [traits.client-id-required, traits.standard-error-responses]
+        responses:
+            200:
+              body:
+                application/json:
+                  type: OrdersRequestTypesLib.OrdersResponse
+                  example: !include examples/get-orderDetail.json
+
+    /orderItems:
+      get:
+          description: Returns order deails for the order id.
+          is: [traits.client-id-required, traits.standard-error-responses]
+          responses:
+              200:
+                body:
+                  application/json:
+                    type: OrdersRequestTypesLib.OrderItemsResponse
+                    example: !include examples/get-orderDetailItem.json
+
+/items:
+  /{itemId}:
+    uriParameters: 
+      itemId: 
+        description: Item Id
+        type: string
+        example: "Item15346"
+    get:
+        description: Returns the item details.
+        is: [traits.client-id-required, traits.standard-error-responses]
+        responses:
+            200:
+              body:
+                application/json:
+                  type: OrdersRequestTypesLib.Items
+                  example: !include examples/get-itemDetails.json

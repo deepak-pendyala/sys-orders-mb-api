@@ -1,0 +1,50 @@
+#%RAML 1.0 Library
+uses: 
+  OrderItemDetailType: OrderItemDetailLib.raml
+types:
+  OrdersResponse:
+    displayName: OrdersResponse
+    type: object
+    properties:
+      orderID:
+        required: true
+        displayName: OrderID
+        type: string
+      placementDate:
+        required: false
+        displayName: PlacementDate
+        type: string
+      customerName:
+        required: false
+        displayName: CustomerName
+        type: string
+
+  OrderItemsResponse:
+    displayName: OrderItemsResponse
+    type: object
+    properties:
+      orderID:
+        required: true
+        displayName: OrderID
+        type: string
+      orderItems:
+        required: true
+        displayName: OrderID
+        type: OrderItemDetailType.OrderItemDetailLib[]
+
+  Items:
+    displayName: ItemTypes
+    type: object
+    properties:
+      itemId:
+        required: true
+        displayName: ItemID
+        type: string
+      itemName:
+        required: false
+        displayName: ItemName
+        type: string
+      itemCost:
+        required: false
+        displayName: ItemCost
+        type: string

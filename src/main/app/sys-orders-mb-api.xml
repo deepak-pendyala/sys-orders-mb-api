@@ -1,0 +1,54 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<mule xmlns:json-logger="http://www.mulesoft.org/schema/mule/json-logger" xmlns:dw="http://www.mulesoft.org/schema/mule/ee/dw" xmlns:db="http://www.mulesoft.org/schema/mule/db" xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" xmlns="http://www.mulesoft.org/schema/mule/core" xmlns:doc="http://www.mulesoft.org/schema/mule/documentation" xmlns:http="http://www.mulesoft.org/schema/mule/http" xmlns:spring="http://www.springframework.org/schema/beans" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-current.xsd
+http://www.mulesoft.org/schema/mule/core http://www.mulesoft.org/schema/mule/core/current/mule.xsd
+http://www.mulesoft.org/schema/mule/http http://www.mulesoft.org/schema/mule/http/current/mule-http.xsd
+http://www.mulesoft.org/schema/mule/apikit http://www.mulesoft.org/schema/mule/apikit/current/mule-apikit.xsd
+http://www.mulesoft.org/schema/mule/db http://www.mulesoft.org/schema/mule/db/current/mule-db.xsd
+http://www.mulesoft.org/schema/mule/ee/dw http://www.mulesoft.org/schema/mule/ee/dw/current/dw.xsd
+http://www.mulesoft.org/schema/mule/json-logger http://www.mulesoft.org/schema/mule/json-logger/current/mule-json-logger.xsd">
+
+   
+    <flow name="sys-orders-mb-api-main">
+        <http:listener config-ref="http-shared" path="/${api.name}/${api.version}/*" doc:name="HTTP"/>
+        <json-logger:logger config-ref="JSON_Logger__Logger_Configuration" doc:name="JSON Logger">
+            <json-logger:logger-json message="Sys api for order id #[message.inboundProperties.'http.uri.params'.orderId]"/>
+        </json-logger:logger>
+        <apikit:router xmlns:apikit="http://www.mulesoft.org/schema/mule/apikit" config-ref="sys-orders-mb-api-config" doc:name="APIkit Router"/>
+        <exception-strategy ref="api-apiKitGlobalExceptionMapping" doc:name="Reference Exception Strategy"/>
+    </flow>
+    <flow name="get:/orders/{orderId}:sys-orders-mb-api-config">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database-Orders Query">
+            <db:parameterized-query><![CDATA[select * from mb_orders where mb_orders_id=#[message.inboundProperties.'http.uri.params'.orderId];]]></db:parameterized-query>
+        </db:select>
+        <dw:transform-message doc:name="Transform Orders">
+            <dw:set-payload resource="classpath:dwl\mb_orders.dwl"/>
+        </dw:transform-message>
+        <json-logger:logger config-ref="JSON_Logger__Logger_Configuration" doc:name="JSON Logger">
+            <json-logger:logger-json tracePoint="AFTER_TRANSFORM" message="Orders query response #[payload]"/>
+        </json-logger:logger>
+    </flow>
+	<flow name="get:/orders/{orderId}/orderItems:sys-orders-mb-api-config">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database Order Items Query">
+            <db:parameterized-query><![CDATA[select * from mb_order_items where mb_order_id=#[message.inboundProperties.'http.uri.params'.orderId];]]></db:parameterized-query>
+
+        </db:select>
+        <dw:transform-message doc:name="Transform OrderItems">
+            <dw:set-payload resource="classpath:dwl\mb_orderItems.dwl"/>
+        </dw:transform-message>
+        <json-logger:logger config-ref="JSON_Logger__Logger_Configuration" doc:name="JSON Logger">
+            <json-logger:logger-json tracePoint="AFTER_TRANSFORM" message="OrderItems query response #[payload]"/>
+        </json-logger:logger>
+    </flow>
+    <flow name="get:/items/{itemId}:sys-orders-mb-api-config">
+        <db:select config-ref="MySQL_Configuration" doc:name="Database Items Query">
+            <db:parameterized-query><![CDATA[select * from mb_items where mb_item_id=#[message.inboundProperties.'http.uri.params'.itemId];]]></db:parameterized-query>
+
+        </db:select>
+        <dw:transform-message doc:name="Transform Items">
+            <dw:set-payload resource="classpath:dwl\mb_items.dwl"/>
+        </dw:transform-message>
+        <json-logger:logger config-ref="JSON_Logger__Logger_Configuration" doc:name="JSON Logger">
+            <json-logger:logger-json tracePoint="AFTER_TRANSFORM" message="Items query response #[payload]"/>
+        </json-logger:logger>
+    </flow>
+</mule>
